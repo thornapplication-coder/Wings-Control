@@ -23,6 +23,7 @@ interface State {
   filters: Filters;
   trash: TrashEntry[];
   rememberedMemberId?: ID;
+  trainerView: { visible: string[] }; // per-device column selection for the trainer roster
   toast?: { text: string; at: number };
 
   // access
@@ -57,6 +58,10 @@ interface State {
   patchReference: (patch: Partial<Pick<Dataset, 'bases' | 'fleets' | 'qualificationTypes' | 'workstreamTemplate' | 'reportWorkstreamTemplate'>>, label: string) => void;
   setMemberActive: (id: ID, active: boolean) => void;
 
+  setTrainerVisibleColumns: (visible: string[]) => void;
+  addTrainerColumn: (label: string) => void;
+  deleteTrainerColumn: (id: ID) => void;
+
   showToast: (text: string) => void;
   resetDemo: () => void;
 }
@@ -68,6 +73,8 @@ const safeStorage: StateStorage = {
 };
 
 const uid = (p: string) => `${p}-${Math.random().toString(36).slice(2, 9)}`;
+
+export const DEFAULT_TRAINER_COLUMNS = ['tlc', 'name', 'qual', 'aircraft', 'base', 'partTime', 'ore', 'data'];
 
 const DEFAULT_FILTERS: Filters = { fleet: 'ALL', base: 'ALL', projectId: 'ALL' };
 
@@ -97,6 +104,7 @@ export const useStore = create<State>()(
         admin: null,
         filters: DEFAULT_FILTERS,
         trash: [],
+        trainerView: { visible: DEFAULT_TRAINER_COLUMNS },
 
         signIn: (memberId, password) => {
           const m = get().data.members.find((x) => x.id === memberId);
@@ -245,17 +253,52 @@ export const useStore = create<State>()(
           log('admin', 'changed reference data', label);
         },
 
+        setTrainerVisibleColumns: (visible) => set({ trainerView: { visible } }),
+        addTrainerColumn: (label) => {
+          const col = { id: uid('col'), label: label.trim() };
+          set((s) => ({
+            data: { ...s.data, trainerColumns: [...s.data.trainerColumns, col] },
+            trainerView: { visible: [...s.trainerView.visible, col.id] },
+          }));
+          log('trainer', 'added roster column', col.label);
+        },
+        deleteTrainerColumn: (id) => {
+          const col = get().data.trainerColumns.find((c) => c.id === id);
+          if (!col) return;
+          set((s) => ({
+            data: {
+              ...s.data,
+              trainerColumns: s.data.trainerColumns.filter((c) => c.id !== id),
+              trainers: s.data.trainers.map((t) => {
+                if (!t.custom || !(id in t.custom)) return t;
+                const { [id]: _removed, ...rest } = t.custom; // eslint-disable-line @typescript-eslint/no-unused-vars
+                return { ...t, custom: rest };
+              }),
+            },
+            trainerView: { visible: s.trainerView.visible.filter((v) => v !== id) },
+          }));
+          log('trainer', 'deleted roster column (incl. values)', col.label);
+        },
+
         showToast: (text) => set({ toast: { text, at: Date.now() } }),
-        resetDemo: () => set((s) => ({ data: buildSeed(), trash: [], filters: DEFAULT_FILTERS, session: s.session, admin: s.admin })),
+        resetDemo: () => set((s) => ({ data: buildSeed(), trash: [], filters: DEFAULT_FILTERS, trainerView: { visible: DEFAULT_TRAINER_COLUMNS }, session: s.session, admin: s.admin })),
       };
     },
     {
       name: 'wings-control-prototype',
-      version: 2, // bump to discard outdated prototype data stored in the browser
+      version: 3,
+      // v2 → v3: trainer roster columns. Keeps the user's test data instead of discarding it.
+      migrate: (persisted, version) => {
+        const st = persisted as { data?: Dataset; trainerView?: State['trainerView'] };
+        if (version < 2) return {} as State; // older data predates fixes – start from seed
+        if (st.data && !st.data.trainerColumns) st.data.trainerColumns = [];
+        if (!st.trainerView) st.trainerView = { visible: DEFAULT_TRAINER_COLUMNS };
+        return st as unknown as State;
+      },
       storage: createJSONStorage(() => safeStorage),
       // Persist the remembered display name and demo data; the session itself is kept for convenience
       // in the prototype only – production sessions are HTTP-only cookies validated server-side.
-      partialize: (s) => ({ data: s.data, session: s.session, rememberedMemberId: s.rememberedMemberId, trash: s.trash, filters: s.filters }),
+      partialize: (s) => ({ data: s.data, session: s.session, rememberedMemberId: s.rememberedMemberId, trash: s.trash, filters: s.filters, trainerView: s.trainerView }),
     },
   ),
 );

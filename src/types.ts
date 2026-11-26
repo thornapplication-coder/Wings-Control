@@ -237,9 +237,14 @@ export interface Trainer {
   authority?: string;
   bAbRaw?: string; // meaning unconfirmed – displayed as supplied
   sourceSnapshot: ISODate;
+  origin?: 'import' | 'manual'; // manual = added in WINGS CONTROL, not from the source workbook
+  custom?: Record<string, string>; // values of user-defined columns (key = column id)
   editedFields: string[]; // fields maintained in WINGS CONTROL after import
   archived: boolean;
 }
+
+/** User-defined additional column for the trainer roster. */
+export interface CustomColumn { id: ID; label: string }
 
 export interface ActivityEntry {
   id: ID;

@@ -4,7 +4,7 @@
 // Only the two display identities named in the PRD (initial team setup) are real names.
 
 import type {
-  ActivityEntry, AppSettings, Base, ComplianceItem, Decision, Fleet, Meeting, Milestone,
+  ActivityEntry, AppSettings, CustomColumn, Base, ComplianceItem, Decision, Fleet, Meeting, Milestone,
   NotificationItem, Organization, Project, Risk, SessionRecord, Task, TeamMember, Trainer,
   TrainingEvent, Workstream,
 } from '../types';
@@ -28,6 +28,7 @@ export interface Dataset {
   trainingEvents: TrainingEvent[];
   compliance: ComplianceItem[];
   trainers: Trainer[];
+  trainerColumns: CustomColumn[];
   activity: ActivityEntry[];
   notifications: NotificationItem[];
   sessions: SessionRecord[];
@@ -328,6 +329,7 @@ export function buildSeed(): Dataset {
       authority: r() < 0.05 ? undefined : pick(authW),
       bAbRaw: r() < 0.35 ? pick(['01/2027', '03/2027', 'x', '06/2027', 'tbd']) : undefined,
       sourceSnapshot: '2026-07-23',
+      origin: 'import',
       editedFields: [],
       archived: false,
     });
@@ -374,6 +376,6 @@ export function buildSeed(): Dataset {
     ],
     reportWorkstreamTemplate,
     organizations, projects, workstreams, milestones, tasks, risks, decisions, meetings,
-    trainingEvents, compliance, trainers, activity, notifications, sessions, settings,
+    trainingEvents, compliance, trainers, trainerColumns: [], activity, notifications, sessions, settings,
   };
 }

@@ -16,7 +16,7 @@ export const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/tasks', label: 'Action Tracker', icon: ListChecks },
-  { to: '/instructors', label: 'Instructors', icon: Users },
+  { to: '/instructors', label: 'Trainers', icon: Users },
   { to: '/training', label: 'Training', icon: GraduationCap },
   { to: '/compliance', label: 'Compliance', icon: ShieldCheck },
   { to: '/meetings', label: 'Meetings', icon: CalendarClock },
