@@ -17,6 +17,8 @@ const DEP_LABEL: Record<DependencyStatus, string> = {
 };
 const SOURCE_LABEL: Record<Task['source'], string> = { project: 'Project', meeting: 'Meeting action', compliance: 'Compliance', stakeholder: 'Stakeholder follow-up', instructor: 'Instructor mgmt', manual: 'Manual' };
 
+const PRIMARY_VIEWS: TaskView[] = ['my', 'team', 'overdue', 'followup', 'waiting_ext'];
+
 export function TasksPage() {
   const data = useStore((s) => s.data);
   const filters = useStore((s) => s.filters);
@@ -43,6 +45,7 @@ export function TasksPage() {
       .sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
   }, [base, view, session.memberId, q, prio, source, T]);
 
+  const showWaiting = ['waiting_ext', 'waiting_int', 'followup'].includes(view);
   const setView = (v: TaskView) => { params.set('view', v); setParams(params); };
   const openTask = data.tasks.find((t) => t.id === openId);
   const exportCsv = () => downloadCsv(`wings-control-tasks-${view}-${T}.csv`, list.map((t) => ({
@@ -53,35 +56,43 @@ export function TasksPage() {
 
   return (
     <div>
-      <SectionTitle title="Action Tracker" subtitle="Central register of tasks and actions from all modules – one canonical record per action"
+      <SectionTitle title="Action Tracker"
         actions={<>
           <Button onClick={exportCsv}><Download size={16} /> <span className="hidden sm:inline">Export view</span></Button>
           <Button variant="primary" onClick={() => setEditing(blankTask(session.memberId))}><Plus size={16} /> New task</Button>
         </>} />
       <FilterBar resultCount={list.length} resultLabel="tasks" />
 
-      <div className="-mx-4 mb-4 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0">
-        <div className="flex gap-1.5">
-          {TASK_VIEWS.map((v) => (
-            <button key={v.key} onClick={() => setView(v.key)}
-              className={cx('flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition',
-                view === v.key ? 'border-brand bg-brand text-white' : 'border-line bg-white text-ink-muted hover:border-ink-soft')}>
-              {v.label}
-              <span className={cx('rounded-full px-1.5 text-[10px]', view === v.key ? 'bg-white/25' : (v.key === 'overdue' || v.key === 'blocked') && counts[v.key] > 0 ? 'bg-status-redBg text-status-red' : 'bg-surface-muted')}>{counts[v.key]}</span>
-            </button>
-          ))}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="-mx-4 flex min-w-0 max-w-full gap-1.5 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0">
+          {PRIMARY_VIEWS.map((k) => {
+            const v = TASK_VIEWS.find((x) => x.key === k)!;
+            return (
+              <button key={k} onClick={() => setView(k)}
+                className={cx('flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition',
+                  view === k ? 'border-brand bg-brand text-white' : 'border-line bg-white text-ink-muted hover:border-ink-soft')}>
+                {v.label}
+                <span className={cx('rounded-full px-1.5 text-[10px]', view === k ? 'bg-white/25' : (k === 'overdue' || k === 'followup') && counts[k] > 0 ? 'bg-status-redBg text-status-red' : 'bg-surface-muted')}>{counts[k]}</span>
+              </button>
+            );
+          })}
         </div>
+        <Select aria-label="More views" value={PRIMARY_VIEWS.includes(view) ? '' : view} onChange={(e) => e.target.value && setView(e.target.value as TaskView)}
+          className={cx('h-9 w-auto text-xs font-bold', !PRIMARY_VIEWS.includes(view) && 'border-brand text-brand')}>
+          <option value="">More views…</option>
+          {TASK_VIEWS.filter((v) => !PRIMARY_VIEWS.includes(v.key)).map((v) => <option key={v.key} value={v.key}>{v.label} ({counts[v.key]})</option>)}
+        </Select>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
         <div className="relative min-w-[200px] flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or ID" className="pl-9" aria-label="Search tasks" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or ID" className="h-9 pl-9" aria-label="Search tasks" />
         </div>
-        <Select value={prio} onChange={(e) => setPrio(e.target.value as typeof prio)} className="w-auto" aria-label="Priority">
+        <Select value={prio} onChange={(e) => setPrio(e.target.value as typeof prio)} className="hidden h-9 w-auto text-sm sm:block" aria-label="Priority">
           <option value="ALL">All priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option>
         </Select>
-        <Select value={source} onChange={(e) => setSource(e.target.value as typeof source)} className="w-auto" aria-label="Source module">
+        <Select value={source} onChange={(e) => setSource(e.target.value as typeof source)} className="hidden h-9 w-auto text-sm sm:block" aria-label="Source module">
           <option value="ALL">All sources</option>
           {Object.entries(SOURCE_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
         </Select>
@@ -93,26 +104,27 @@ export function TasksPage() {
             <table className="hidden w-full text-left text-sm lg:table">
               <thead className="border-b border-line/70 bg-surface-subtle text-[11px] uppercase tracking-wide text-ink-soft">
                 <tr>
-                  <th className="px-4 py-2.5 font-bold">Task</th><th className="px-2 py-2.5 font-bold">Status</th><th className="px-2 py-2.5 font-bold">Priority</th>
-                  <th className="px-2 py-2.5 font-bold">Owner</th><th className="px-2 py-2.5 font-bold">Waiting for</th><th className="px-2 py-2.5 font-bold">Due</th><th className="px-4 py-2.5 font-bold">Source</th>
+                  <th className="px-5 py-2.5 font-bold">Task</th><th className="px-2 py-2.5 font-bold">Owner</th><th className="px-2 py-2.5 font-bold">Status</th>
+                  {showWaiting && <th className="px-2 py-2.5 font-bold">Waiting for</th>}
+                  <th className="px-5 py-2.5 text-right font-bold">Due</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line/60">
                 {list.map((t) => (
                   <tr key={t.id} className="cursor-pointer hover:bg-surface-subtle" onClick={() => { params.set('open', t.id); setParams(params); }}>
-                    <td className="max-w-[340px] px-4 py-3">
-                      <div className="truncate font-semibold text-ink">{t.title}</div>
-                      <div className="mt-0.5 flex items-center gap-2 text-xs text-ink-soft"><span>{t.ref}</span><FleetTag fleet={t.fleet} />{t.base && <Tag>{t.base}</Tag>}<span className="truncate">{data.projects.find((p) => p.id === t.projectId)?.title}</span></div>
+                    <td className="max-w-[420px] px-5 py-2.5">
+                      <div className="truncate font-semibold text-ink">{(t.priority === 'critical' || t.priority === 'high') && <span className={cx('mr-1.5 text-xs', t.priority === 'critical' ? 'text-status-red' : 'text-status-amber')} aria-label={t.priority}>{t.priority === 'critical' ? '▲▲' : '▲'}</span>}{t.title}</div>
+                      <div className="mt-0.5 truncate text-xs text-ink-soft">{t.ref} · {t.fleet === 'B737' ? 'B737 MAX' : t.fleet === 'GEN' ? 'General' : t.fleet}{t.base && ` · ${t.base}`}{t.projectId && ` · ${data.projects.find((p) => p.id === t.projectId)?.title}`}</div>
                     </td>
-                    <td className="px-2 py-3"><StatusPill status={t.status} /></td>
-                    <td className="px-2 py-3"><PriorityTag priority={t.priority} /></td>
-                    <td className="px-2 py-3"><span className="flex items-center gap-2 text-xs font-semibold text-ink-muted"><Avatar name={memberName(data.members, t.ownerId)} size={24} />{memberName(data.members, t.ownerId)}</span></td>
-                    <td className="max-w-[180px] px-2 py-3 text-xs">
-                      {t.dependencyType ? <><div className="truncate font-semibold text-ink">{data.organizations.find((o) => o.id === t.waitingForOrgId)?.name ?? t.waitingForPerson}</div>
-                        <div className={cx(isFollowUpDue(t, T) ? 'font-bold text-status-amber' : 'text-ink-soft')}>follow-up {fmtShort(t.followUpDate)}</div></> : <span className="text-ink-soft">—</span>}
-                    </td>
-                    <td className={cx('px-2 py-3 text-xs font-semibold', isOverdue(t, T) ? 'text-status-red' : 'text-ink-muted')}>{fmtShort(t.dueDate)}<div className="font-normal">{t.status !== 'completed' && relDays(t.dueDate, T)}</div></td>
-                    <td className="px-4 py-3 text-xs text-ink-soft">{SOURCE_LABEL[t.source]}</td>
+                    <td className="px-2 py-2.5"><span className="flex items-center gap-2 text-xs font-semibold text-ink-muted"><Avatar name={memberName(data.members, t.ownerId)} size={24} />{memberName(data.members, t.ownerId)}</span></td>
+                    <td className="px-2 py-2.5"><StatusPill status={t.status} /></td>
+                    {showWaiting && (
+                      <td className="max-w-[200px] px-2 py-2.5 text-xs">
+                        <div className="truncate font-semibold text-ink">{data.organizations.find((o) => o.id === t.waitingForOrgId)?.name ?? t.waitingForPerson ?? '—'}</div>
+                        <div className={cx(isFollowUpDue(t, T) ? 'font-bold text-status-amber' : 'text-ink-soft')}>follow-up {fmtShort(t.followUpDate)}</div>
+                      </td>
+                    )}
+                    <td className={cx('whitespace-nowrap px-5 py-2.5 text-right text-xs font-semibold', isOverdue(t, T) ? 'text-status-red' : 'text-ink-muted')}>{isOverdue(t, T) ? relDays(t.dueDate, T) : fmtShort(t.dueDate)}</td>
                   </tr>
                 ))}
               </tbody>

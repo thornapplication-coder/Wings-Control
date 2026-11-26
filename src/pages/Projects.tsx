@@ -46,7 +46,7 @@ export function ProjectsPage() {
 
   return (
     <div>
-      <SectionTitle title="Projects" subtitle="Projects, programmes and workstreams"
+      <SectionTitle title="Projects"
         actions={<>
           <Segmented label="View" value={mode} onChange={setMode} options={[{ value: 'list', label: 'Cards' }, { value: 'board', label: 'Board' }]} />
           <Button variant="primary" onClick={() => setCreating(true)}><Plus size={16} /> New project</Button>

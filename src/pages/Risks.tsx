@@ -36,7 +36,7 @@ export function RisksPage() {
 
   return (
     <div>
-      <SectionTitle title="Risks & Decisions" subtitle="Risk and issue register · central decision log"
+      <SectionTitle title="Risks & Decisions"
         actions={<Button variant="primary" onClick={() => (tab === 'risks' ? setEditRisk(newRisk(data.risks.length)) : setEditDec(newDecision(data.decisions.length)))}><Plus size={16} /> {tab === 'risks' ? 'Risk / issue' : 'Decision'}</Button>} />
       <FilterBar showBase={false} />
       <div className="mb-4 flex gap-1 border-b border-line" role="tablist">

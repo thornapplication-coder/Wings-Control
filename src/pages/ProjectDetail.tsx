@@ -75,7 +75,7 @@ export function ProjectDetailPage() {
 
       {tab === 'overview' && (
         <Card>
-          <CardHeader title="Workstreams" subtitle="Status and trend per workstream feed the executive weekly report"
+          <CardHeader title="Workstreams"
             action={<Button size="sm" onClick={() => setEditWs({ id: `ws-${Math.random().toString(36).slice(2, 8)}`, projectId: p.id, name: '', order: (ws.at(-1)?.order ?? 0) + 1, rag: 'grey', trend: 'unchanged', keyFacts: '' })}><Plus size={14} /> Add</Button>} />
           {ws.length === 0 && <EmptyState icon={EW.org} title="No workstreams yet" />}
           <ul className="divide-y divide-line/60 border-t border-line/60">

@@ -7,7 +7,7 @@ export function StakeholdersPage() {
   const data = useStore((s) => s.data);
   return (
     <div>
-      <SectionTitle title="Stakeholders & Partners" subtitle="External parties are recorded without application access · synthetic organisations" />
+      <SectionTitle title="Stakeholders & Partners" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {data.organizations.map((o) => {
           const open = data.tasks.filter((t) => t.waitingForOrgId === o.id && isWaiting(t));

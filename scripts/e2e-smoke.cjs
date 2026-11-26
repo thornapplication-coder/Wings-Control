@@ -12,9 +12,9 @@ const F = 'file://' + path.resolve(__dirname, '../dist-single/index.html');
   await p.goto(F + '#/admin'); await p.waitForTimeout(200); ok(p.url().includes('admin-login'), 'admin route without admin session → admin login');
   ok(await p.locator('nav >> text=Administration').count() === 0, 'no admin nav for team session');
   await p.goto(F + '#/'); await p.waitForTimeout(200);
-  const before = await p.locator('a:has-text("Open Tasks") div.text-3xl').innerText();
+  const before = await p.locator('a:has-text("Overdue tasks") span.text-2xl').innerText();
   await p.click('button[role=radio]:has-text("A320")'); await p.waitForTimeout(150);
-  const after = await p.locator('a:has-text("Open Tasks") div.text-3xl').innerText();
+  const after = await p.locator('a:has-text("Overdue tasks") span.text-2xl').innerText();
   ok(before !== after, `fleet filter changes KPI (${before} → ${after})`);
   // action item → task, duplicate prevention
   await p.goto(F + '#/meetings/mt-1'); await p.waitForTimeout(200);

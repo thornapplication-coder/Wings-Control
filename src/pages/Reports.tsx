@@ -15,7 +15,7 @@ export function ReportsPage() {
   const projects = useStore((s) => s.data.projects.filter((p) => !p.archived && p.status === 'active'));
   return (
     <div>
-      <SectionTitle title="Reports" subtitle="Generated from live records · published reports become immutable snapshots" />
+      <SectionTitle title="Reports" />
       <h2 className="mb-3 text-sm font-bold text-ink">Executive Weekly Report</h2>
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {projects.map((p) => (

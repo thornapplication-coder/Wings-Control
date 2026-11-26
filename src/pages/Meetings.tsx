@@ -20,7 +20,7 @@ export function MeetingsPage() {
   const list = useMemo(() => data.meetings.filter((m) => !q || m.title.toLowerCase().includes(q.toLowerCase()) || (m.minutes?.notes ?? '').toLowerCase().includes(q.toLowerCase())).sort((a, b) => b.date.localeCompare(a.date)), [data.meetings, q]);
   return (
     <div>
-      <SectionTitle title="Meetings & Minutes" subtitle="Meetings, minutes, decisions and action items"
+      <SectionTitle title="Meetings & Minutes"
         actions={<><Button onClick={() => useStore.getState().showToast('Upload of DOCX/PDF minutes follows with secure storage')}><Upload size={16} /> <span className="hidden sm:inline">Upload minutes</span></Button><Button variant="primary" onClick={() => setCreating(true)}><Plus size={16} /> New meeting</Button></>} />
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or minutes text…" className="mb-4 max-w-md" aria-label="Search meetings" />
       <Card>
@@ -172,7 +172,7 @@ export function MeetingDetailPage() {
           </Card>
 
           <Card>
-            <CardHeader title="Action items" subtitle="Convert to a task with one click – the task keeps the meeting reference; duplicates are prevented"
+            <CardHeader title="Action items"
               action={!final && <Button size="sm" onClick={() => setNewAi(true)}><Plus size={14} /> Add</Button>} />
             <ul className="divide-y divide-line/60 border-t border-line/60">
               {(m.minutes?.actionItems ?? []).map((a) => {
@@ -196,7 +196,7 @@ export function MeetingDetailPage() {
 
         <div className="space-y-5">
           <Card>
-            <CardHeader title="Decisions" subtitle="Linked to the central Decision Log – no duplicate records" />
+            <CardHeader title="Decisions" />
             <ul className="divide-y divide-line/60 border-t border-line/60">
               {decisions.map((d) => <li key={d.id} className="px-4 py-3 sm:px-5"><span className="block text-sm font-semibold text-ink">{d.ref} {d.title}</span><span className="text-xs text-ink-soft">{d.status} · {d.authority}</span></li>)}
             </ul>

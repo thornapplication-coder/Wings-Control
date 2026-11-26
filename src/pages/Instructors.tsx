@@ -255,7 +255,7 @@ function Analytics({ list, f, onFilter, onBase }: { list: Trainer[]; f: TrainerF
           </div>
         </Card>
         <Card className="lg:col-span-2 xl:col-span-1">
-          <CardHeader title="Part time & ORE" subtitle="Values as imported" />
+          <CardHeader title="Part time & ORE" />
           <div className="grid grid-cols-1 gap-4 border-t border-line/60 px-3 py-3 sm:grid-cols-2 xl:grid-cols-1">
             <div>{byPart.map((a) => <HBar key={a.key} label={label(a.key)} value={a.count} max={byPart[0]?.count ?? 1} color={a.key === MISSING ? 'bg-status-grey' : 'bg-brand-dark'} onClick={() => onFilter('partTime', a.key)} />)}</div>
             <div>{byOre.map((a) => <HBar key={a.key} label={a.key === MISSING ? 'ORE not recorded' : `ORE ${a.key}`} value={a.count} max={byOre[0]?.count ?? 1} color={a.key === MISSING ? 'bg-status-grey' : 'bg-sky'} onClick={() => onFilter('ore', a.key)} />)}</div>

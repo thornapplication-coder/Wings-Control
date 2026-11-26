@@ -26,7 +26,7 @@ export function TrainingPage() {
   );
   return (
     <div>
-      <SectionTitle title="Training" subtitle="Course types, events, participants and simulator resources" />
+      <SectionTitle title="Training" />
       <FilterBar showProject={false} resultCount={list.length} resultLabel="events" />
       <Card className="mb-5">
         <div className="flex items-center gap-3 border-b border-line/60 px-5 py-3"><img src={EW.training} alt="" className="h-8 w-8 object-contain" /><h2 className="font-bold text-ink">Upcoming ({upcoming.length})</h2></div>

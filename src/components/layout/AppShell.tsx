@@ -13,17 +13,17 @@ import { SearchDialog } from './SearchDialog';
 import { QuickCreate } from './QuickCreate';
 
 export const NAV = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/projects', label: 'Projects', icon: FolderKanban },
-  { to: '/tasks', label: 'Action Tracker', icon: ListChecks },
-  { to: '/instructors', label: 'Trainers', icon: Users },
-  { to: '/training', label: 'Training', icon: GraduationCap },
-  { to: '/compliance', label: 'Compliance', icon: ShieldCheck },
-  { to: '/meetings', label: 'Meetings', icon: CalendarClock },
-  { to: '/risks', label: 'Risks & Decisions', icon: AlertTriangle },
-  { to: '/stakeholders', label: 'Stakeholders', icon: Building2 },
-  { to: '/knowledge', label: 'Knowledge Base', icon: BookOpen },
-  { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true, group: '' },
+  { to: '/tasks', label: 'Action Tracker', icon: ListChecks, group: 'Work' },
+  { to: '/projects', label: 'Projects', icon: FolderKanban, group: 'Work' },
+  { to: '/meetings', label: 'Meetings', icon: CalendarClock, group: 'Work' },
+  { to: '/risks', label: 'Risks & Decisions', icon: AlertTriangle, group: 'Work' },
+  { to: '/instructors', label: 'Trainers', icon: Users, group: 'Training' },
+  { to: '/training', label: 'Training', icon: GraduationCap, group: 'Training' },
+  { to: '/compliance', label: 'Compliance', icon: ShieldCheck, group: 'Governance' },
+  { to: '/reports', label: 'Reports', icon: BarChart3, group: 'Governance' },
+  { to: '/stakeholders', label: 'Stakeholders', icon: Building2, group: 'Governance' },
+  { to: '/knowledge', label: 'Knowledge Base', icon: BookOpen, group: 'Governance' },
 ];
 
 const MOBILE_NAV = [
@@ -91,13 +91,19 @@ export function AppShell() {
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-2" aria-label="Main">
-          {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} title={n.label}
+          {NAV.map((n, i) => (
+            <div key={n.to}>
+            {n.group && n.group !== NAV[i - 1]?.group && (
+              <div className={cx('mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-soft', collapsed ? 'hidden' : 'hidden lg:block')}>{n.group}</div>
+            )}
+            {n.group && n.group !== NAV[i - 1]?.group && <div className={cx('mx-3 my-2 border-t border-line/70', collapsed ? 'block' : 'lg:hidden')} />}
+            <NavLink to={n.to} end={n.end} title={n.label}
               className={({ isActive }) => cx('mb-0.5 flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition',
                 isActive ? 'bg-brand-tint text-brand' : 'text-ink-muted hover:bg-surface-subtle hover:text-ink')}>
               <n.icon size={19} className="shrink-0" />
               <span className={collapsed ? 'sr-only' : 'sr-only lg:not-sr-only'}>{n.label}</span>
             </NavLink>
+            </div>
           ))}
           {admin && (
             <>

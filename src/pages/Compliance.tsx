@@ -21,7 +21,7 @@ export function CompliancePage() {
   const list = useMemo(() => data.compliance.filter((c) => !c.archived && fleetMatch(c.fleet, filters.fleet) && (cat === 'ALL' || c.category === cat)), [data.compliance, filters, cat]);
   return (
     <div>
-      <SectionTitle title="Compliance & Approvals" subtitle="Tracking aid – the approved compliance monitoring system remains the authoritative record" />
+      <SectionTitle title="Compliance & Approvals" />
       <FilterBar showBase={false} showProject={false} resultCount={list.length} resultLabel="items" />
       <div className="mb-4"><Select value={cat} onChange={(e) => setCat(e.target.value)} className="w-auto" aria-label="Category"><option value="ALL">All categories</option>{Object.entries(CAT).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</Select></div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
