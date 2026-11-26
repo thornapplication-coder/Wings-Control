@@ -4,7 +4,7 @@ name: Deploy prototype to GitHub Pages
 
 on:
   push:
-    branches: [main, claude/adoring-johnson-ultkg9]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
